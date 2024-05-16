@@ -87,7 +87,7 @@ def schedule_classes(time_table, classes):
         time = random.choice(list(timeslots.keys()))
         room = random.choice(rooms)
 
-        if time_table[day][time][room] is None:
+        if time_table[day][time][room] is None and cls.faculty not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in rooms] and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in rooms] and cls.hours > 0:
             time_table[day][time][room] = cls
             cls.hours -= 1
 
