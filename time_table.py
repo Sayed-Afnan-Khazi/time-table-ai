@@ -38,7 +38,7 @@ days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 # A(7:30-8:30), B(8:30-9:30), C(9:30-10:30),
 # D(11:00-11:50), E(11:50-12:40), F(12:40-1:30),
 # G(2:30-3:30), H(3:30-4:30), I(4:30-5:30)
-timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-1:30', 'G': '2:30-3:30', 'H': '3:30-4:30', 'I': '4:30-5:30'}
+timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
 
 # rooms: IS101, IS102, IS103 (for now)
 rooms = ['IS101', 'IS102', 'IS103']
@@ -107,42 +107,46 @@ def backtrack_schedule(time_table, classes):
 def schedule_classes(time_table, classes):
     return backtrack_schedule(time_table, classes)
 
-def create_faculty_hours_allotted_table(time_table):
-    global classes
-    # Calculate the total hours allotted for each faculty
-    faculty_hours = {}
-    for day, slots in time_table.items():
-        for slot, rooms in slots.items():
-            for room, cls in rooms.items():
-                if cls is not None:
-                    if cls.faculty not in faculty_hours:
-                        faculty_hours[cls.faculty] = 1
-                    faculty_hours[cls.faculty] += 1
+# def create_faculty_hours_allotted_table(time_table):
+#     global classes
+#     # Calculate the total hours allotted for each faculty
+#     faculty_hours = {}
+#     original_hours = {}
+#     for day, slots in time_table.items():
+#         for slot, rooms in slots.items():
+#             for room, cls in rooms.items():
+#                 if cls is not None:
+#                     if cls.faculty not in faculty_hours:
+#                         faculty_hours[cls.faculty] = 1
+#                     faculty_hours[cls.faculty] += 1
+#                     if cls.faculty not in original_hours:
+#                         original_hours[cls.faculty] = cls.original_hours
+#                     original_hours[cls.faculty] += cls.original_hours
 
-    # Calculate the original hours to be allotted for each faculty
-    original_hours = {}
-    for cls in classes:
-        if cls.faculty not in original_hours:
-            original_hours[cls.faculty] = cls.original_hours
-        original_hours[cls.faculty] += cls.original_hours
+#     # Calculate the original hours to be allotted for each faculty
+#     # original_hours = {}
+#     # for cls in classes:
+#     #     if cls.faculty not in original_hours:
+#     #         original_hours[cls.faculty] = cls.original_hours
+#     #     original_hours[cls.faculty] += cls.original_hours
     
-    # Save faculty names and their total hour count in outputs/faculty_hours_allotted.csv
-    output_dir = 'outputs'
-    os.makedirs(output_dir, exist_ok=True)
-    faculty_hours_file = os.path.join(output_dir, 'faculty_hours_allotted.csv')
+#     # Save faculty names and their total hour count in outputs/faculty_hours_allotted.csv
+#     output_dir = 'outputs'
+#     os.makedirs(output_dir, exist_ok=True)
+#     faculty_hours_file = os.path.join(output_dir, 'faculty_hours_allotted.csv')
     
-    with open(faculty_hours_file, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerow(['Faculty', 'Total Hours Allotted', 'Total Hours to be Allotted'])
+#     with open(faculty_hours_file, 'w', newline='') as file:
+#         writer = csv.writer(file)
+#         writer.writerow(['Faculty', 'Total Hours Allotted', 'Total Hours to be Allotted'])
         
-        for faculty, hours in faculty_hours.items():
-            writer.writerow([faculty, hours, original_hours[faculty]])
+#         for faculty, hours in faculty_hours.items():
+#             writer.writerow([faculty, hours, original_hours[faculty]])
     
-    return faculty_hours
+#     return faculty_hours
 
 if __name__ == '__main__':
     classes = read_classes()
     time_table = init_time_table(days, timeslots, rooms)
     print(schedule_classes(time_table, classes))
-    create_faculty_hours_allotted_table(time_table)
+    # create_faculty_hours_allotted_table(time_table)
     print_time_table(time_table)
