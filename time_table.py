@@ -8,6 +8,7 @@ class Class:
         self.name_code = name_code
         self.group = group
         self.hours = hours
+        self.original_hours = self.hours
 
     def __str__(self):
         return f"{self.faculty} conducting {self.hours} of {self.name_code}"
@@ -73,27 +74,75 @@ def print_time_table(time_table):
                         writer.writerow([timeslots[slot], room, 'No class scheduled'])
 
 def class_to_allot(classes):
-    random.shuffle(classes)
+    random.shuffle(classes) # To introduce randomness and make it non-deterministic.
     for cls in classes:
         if cls.hours > 0:
             return cls
     return None
 
 
+def backtrack_schedule(time_table, classes):
+    
+    cls = class_to_allot(classes)
+    if cls is None:
+        return True
+    
+    for day in days:
+        for time in timeslots.keys():
+            for room in rooms:
+                if time_table[day][time][room] is None and cls.faculty not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in rooms] and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in rooms] and cls.hours > 0:
+                    time_table[day][time][room] = cls
+                    cls.hours -= 1
+                    print("Allotted",cls.format())
+
+                    if backtrack_schedule(time_table, classes):
+                        return True
+
+                    time_table[day][time][room] = None
+                    cls.hours += 1
+                    print("De-Allotted",cls.format())
+    
+    return False
 
 def schedule_classes(time_table, classes):
-    while cls:= class_to_allot(classes):
-        day = random.choice(days)
-        time = random.choice(list(timeslots.keys()))
-        room = random.choice(rooms)
+    return backtrack_schedule(time_table, classes)
 
-        if time_table[day][time][room] is None and cls.faculty not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in rooms] and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in rooms] and cls.hours > 0:
-            time_table[day][time][room] = cls
-            cls.hours -= 1
+def create_faculty_hours_allotted_table(time_table):
+    global classes
+    # Calculate the total hours allotted for each faculty
+    faculty_hours = {}
+    for day, slots in time_table.items():
+        for slot, rooms in slots.items():
+            for room, cls in rooms.items():
+                if cls is not None:
+                    if cls.faculty not in faculty_hours:
+                        faculty_hours[cls.faculty] = 1
+                    faculty_hours[cls.faculty] += 1
 
+    # Calculate the original hours to be allotted for each faculty
+    original_hours = {}
+    for cls in classes:
+        if cls.faculty not in original_hours:
+            original_hours[cls.faculty] = cls.original_hours
+        original_hours[cls.faculty] += cls.original_hours
+    
+    # Save faculty names and their total hour count in outputs/faculty_hours_allotted.csv
+    output_dir = 'outputs'
+    os.makedirs(output_dir, exist_ok=True)
+    faculty_hours_file = os.path.join(output_dir, 'faculty_hours_allotted.csv')
+    
+    with open(faculty_hours_file, 'w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(['Faculty', 'Total Hours Allotted', 'Total Hours to be Allotted'])
+        
+        for faculty, hours in faculty_hours.items():
+            writer.writerow([faculty, hours, original_hours[faculty]])
+    
+    return faculty_hours
 
 if __name__ == '__main__':
     classes = read_classes()
     time_table = init_time_table(days, timeslots, rooms)
-    schedule_classes(time_table, classes)
+    print(schedule_classes(time_table, classes))
+    create_faculty_hours_allotted_table(time_table)
     print_time_table(time_table)
