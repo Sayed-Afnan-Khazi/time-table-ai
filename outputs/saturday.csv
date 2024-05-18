@@ -1,19 +1,24 @@
 Time Slot,Room,Class
-7:30-8:30,IS101,NA -  22IS440 -  ISE-4A
-7:30-8:30,IS102,No class scheduled
-7:30-8:30,IS103,No class scheduled
+7:30-8:30,IS101,VHY -  20CB620 -  CSBS-6
+7:30-8:30,IS102,NA -  22IS440 -  ISE-4B
+7:30-8:30,IS103,PMKS -  22CB430 -  CSBS-4
 7:30-8:30,ISLAB1,No class scheduled
 7:30-8:30,ISLAB2,No class scheduled
-8:30-9:30,IS101,NA -  22IS440 -  ISE-4A
+8:30-9:30,IS101,No class scheduled
 8:30-9:30,IS102,No class scheduled
 8:30-9:30,IS103,No class scheduled
 8:30-9:30,ISLAB1,No class scheduled
 8:30-9:30,ISLAB2,No class scheduled
-9:30-10:30,IS101,NA -  22IS440 -  ISE-4A
+9:30-10:30,IS101,No class scheduled
 9:30-10:30,IS102,No class scheduled
 9:30-10:30,IS103,No class scheduled
 9:30-10:30,ISLAB1,No class scheduled
 9:30-10:30,ISLAB2,No class scheduled
+10:30-11:00,IS101,BREAK
+10:30-11:00,IS102,BREAK
+10:30-11:00,IS103,BREAK
+10:30-11:00,ISLAB1,BREAK
+10:30-11:00,ISLAB2,BREAK
 11:00-11:50,IS101,No class scheduled
 11:00-11:50,IS102,No class scheduled
 11:00-11:50,IS103,No class scheduled
@@ -29,6 +34,11 @@ Time Slot,Room,Class
 12:40-13:30,IS103,No class scheduled
 12:40-13:30,ISLAB1,No class scheduled
 12:40-13:30,ISLAB2,No class scheduled
+13:30-14:30,IS101,BREAK
+13:30-14:30,IS102,BREAK
+13:30-14:30,IS103,BREAK
+13:30-14:30,ISLAB1,BREAK
+13:30-14:30,ISLAB2,BREAK
 14:30-15:30,IS101,No class scheduled
 14:30-15:30,IS102,No class scheduled
 14:30-15:30,IS103,No class scheduled

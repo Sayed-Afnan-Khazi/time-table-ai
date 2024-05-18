@@ -48,7 +48,7 @@ days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 # A(7:30-8:30), B(8:30-9:30), C(9:30-10:30),
 # D(11:00-11:50), E(11:50-12:40), F(12:40-1:30),
 # G(2:30-3:30), H(3:30-4:30), I(4:30-5:30)
-timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
+timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
 
 # rooms: IS101, IS102, IS103 (for now)
 rooms = ['IS101', 'IS102', 'IS103']
@@ -65,7 +65,10 @@ def init_time_table(days, timeslots, places):
         for time in timeslots.keys():
             time_table[day][time] = {}
             for room in places:
-                time_table[day][time][room] = None
+                if time == 'M_BREAK' or time == 'L_BREAK':
+                    time_table[day][time][room] = 'BREAK'
+                else:
+                    time_table[day][time][room] = None
 
     return time_table
 
@@ -108,7 +111,8 @@ def backtrack_schedule(time_table, classes):
                 if cls.class_type == 'L':
                     if room not in labs:
                         continue
-                    print(timings[0])
+                    if current_timeslot+1 >= len(timings):
+                        continue
                     if (time_table[day][time][room] is None
                         and time_table[day][timings[current_timeslot+1]][room] is None
                         and cls.faculty1 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
