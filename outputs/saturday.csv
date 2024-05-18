@@ -1,28 +1,46 @@
 Time Slot,Room,Class
-7:30-8:30,IS101,No class scheduled
-7:30-8:30,IS102,No class scheduled
+7:30-8:30,IS101,LMS -  20IS610 -  ISE-6
+7:30-8:30,IS102,UKK -  20CB610 -  CSBS-6
 7:30-8:30,IS103,No class scheduled
-8:30-9:30,IS101,No class scheduled
-8:30-9:30,IS102,No class scheduled
+7:30-8:30,ISLAB1,No class scheduled
+7:30-8:30,ISLAB2,No class scheduled
+8:30-9:30,IS101,UKK -  20CB610 -  CSBS-6
+8:30-9:30,IS102,LMS -  20IS610 -  ISE-6
 8:30-9:30,IS103,No class scheduled
+8:30-9:30,ISLAB1,No class scheduled
+8:30-9:30,ISLAB2,No class scheduled
 9:30-10:30,IS101,No class scheduled
 9:30-10:30,IS102,No class scheduled
 9:30-10:30,IS103,No class scheduled
+9:30-10:30,ISLAB1,No class scheduled
+9:30-10:30,ISLAB2,No class scheduled
 11:00-11:50,IS101,No class scheduled
 11:00-11:50,IS102,No class scheduled
 11:00-11:50,IS103,No class scheduled
+11:00-11:50,ISLAB1,No class scheduled
+11:00-11:50,ISLAB2,No class scheduled
 11:50-12:40,IS101,No class scheduled
 11:50-12:40,IS102,No class scheduled
 11:50-12:40,IS103,No class scheduled
+11:50-12:40,ISLAB1,No class scheduled
+11:50-12:40,ISLAB2,No class scheduled
 12:40-13:30,IS101,No class scheduled
 12:40-13:30,IS102,No class scheduled
 12:40-13:30,IS103,No class scheduled
+12:40-13:30,ISLAB1,No class scheduled
+12:40-13:30,ISLAB2,No class scheduled
 14:30-15:30,IS101,No class scheduled
 14:30-15:30,IS102,No class scheduled
 14:30-15:30,IS103,No class scheduled
+14:30-15:30,ISLAB1,No class scheduled
+14:30-15:30,ISLAB2,No class scheduled
 15:30-16:30,IS101,No class scheduled
 15:30-16:30,IS102,No class scheduled
 15:30-16:30,IS103,No class scheduled
+15:30-16:30,ISLAB1,No class scheduled
+15:30-16:30,ISLAB2,No class scheduled
 16:30-17:30,IS101,No class scheduled
 16:30-17:30,IS102,No class scheduled
 16:30-17:30,IS103,No class scheduled
+16:30-17:30,ISLAB1,No class scheduled
+16:30-17:30,ISLAB2,No class scheduled
