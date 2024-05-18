@@ -102,22 +102,24 @@ def backtrack_schedule(time_table, classes):
         return True
     
     for day in days:
-        timings = timeslots.keys()
+        timings = list(timeslots.keys())
         for current_timeslot, time in enumerate(timings):
             for i, room in enumerate(places):
                 if cls.class_type == 'L':
                     if room not in labs:
                         continue
+                    print(timings[0])
                     if (time_table[day][time][room] is None
                         and time_table[day][timings[current_timeslot+1]][room] is None
                         and cls.faculty1 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
-                        and cls.faculty1 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][time][r] else None for r in places]
+                        and cls.faculty1 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                         and cls.faculty2 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
-                        and cls.faculty2 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][time][r] else None for r in places]
+                        and cls.faculty2 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                         and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
-                        and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][time][r] else None for r in places]
+                        and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                         and cls.hours > 1):
                         time_table[day][time][room] = cls
+                        time_table[day][timings[current_timeslot+1]][room] = cls
                         cls.hours -= 2
                         print("Allotted",cls.format())
 
@@ -150,48 +152,9 @@ def backtrack_schedule(time_table, classes):
 def schedule_classes(time_table, classes):
     return backtrack_schedule(time_table, classes)
 
-# def create_faculty_hours_allotted_table(time_table):
-#     global classes
-#     # Calculate the total hours allotted for each faculty
-#     faculty_hours = {}
-#     original_hours = {}
-#     for day, slots in time_table.items():
-# USE PLACES
-#         for slot, rooms in slots.items():
-# USE PLACES
-#             for room, cls in rooms.items():
-#                 if cls is not None:
-#                     if cls.faculty not in faculty_hours:
-#                         faculty_hours[cls.faculty] = 1
-#                     faculty_hours[cls.faculty] += 1
-#                     if cls.faculty not in original_hours:
-#                         original_hours[cls.faculty] = cls.original_hours
-#                     original_hours[cls.faculty] += cls.original_hours
-
-#     # Calculate the original hours to be allotted for each faculty
-#     # original_hours = {}
-#     # for cls in classes:
-#     #     if cls.faculty not in original_hours:
-#     #         original_hours[cls.faculty] = cls.original_hours
-#     #     original_hours[cls.faculty] += cls.original_hours
-    
-#     # Save faculty names and their total hour count in outputs/faculty_hours_allotted.csv
-#     output_dir = 'outputs'
-#     os.makedirs(output_dir, exist_ok=True)
-#     faculty_hours_file = os.path.join(output_dir, 'faculty_hours_allotted.csv')
-    
-#     with open(faculty_hours_file, 'w', newline='') as file:
-#         writer = csv.writer(file)
-#         writer.writerow(['Faculty', 'Total Hours Allotted', 'Total Hours to be Allotted'])
-        
-#         for faculty, hours in faculty_hours.items():
-#             writer.writerow([faculty, hours, original_hours[faculty]])
-    
-#     return faculty_hours
 
 if __name__ == '__main__':
     classes = read_classes()
     time_table = init_time_table(days, timeslots, places)
     print(schedule_classes(time_table, classes))
-    # create_faculty_hours_allotted_table(time_table)
     print_time_table(time_table)
