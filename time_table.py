@@ -122,6 +122,7 @@ def backtrack_schedule(time_table, classes):
                         and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
                         and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                         and cls.hours > 1):
+                        # 3 hour labs?
                         time_table[day][time][room] = cls
                         time_table[day][timings[current_timeslot+1]][room] = cls
                         cls.hours -= 2
