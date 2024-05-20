@@ -90,6 +90,7 @@ def init_time_table(days, timeslots, places):
     return time_table
 
 def print_time_table(time_table):
+    # Note to self: You can directly convert prettytable to HTML and display it on a webpage.
     global timeslots
     output_dir = 'outputs'
     os.makedirs(output_dir, exist_ok=True)
