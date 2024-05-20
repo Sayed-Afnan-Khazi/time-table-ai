@@ -1,6 +1,7 @@
 import random
 import csv
 import os
+from prettytable import PrettyTable, from_csv, DOUBLE_BORDER
 
 class Class:
     def __init__(self, faculty, name_code, group, hours):
@@ -32,6 +33,9 @@ class Break(Class):
         self.name_code = None
         self.group = None
         self.hours = None
+    def format(self):
+        return str(None)
+
 # Read the csv file classes.csv
 def read_classes():
     classes = []
@@ -96,6 +100,30 @@ def print_time_table(time_table):
                         writer.writerow([timeslots[slot], room, cls.format()])
                     else:
                         writer.writerow([timeslots[slot], room, 'No class scheduled'])
+    # All in one file
+    output_dir = 'tabular_outputs'
+    os.makedirs(output_dir, exist_ok=True)
+
+    table = PrettyTable()
+    table.set_style(DOUBLE_BORDER)
+    table.border = True
+    table.field_names = ["Day"] + [timeslots[slot] for slot in slots]
+    for day, slots in time_table.items():
+        current_day = []
+        for slot, rooms in slots.items():
+                slot_data = ''
+                for room, cls in rooms.items():
+                    if cls:
+                        slot_data += room + cls.format() + '\n'
+                    else:
+                        slot_data += room + 'No class scheduled' + '\n'
+                current_day.append(slot_data)
+        table.add_row([day] +current_day)
+    mystring = table.get_string()
+    with open(os.path.join(output_dir, f"allinone.txt"), 'w') as file:
+        file.write(mystring)
+        
+
 
 def class_to_allot(classes):
     random.shuffle(classes) # To introduce randomness and make it non-deterministic.
