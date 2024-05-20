@@ -148,7 +148,7 @@ def backtrack_schedule(time_table, classes):
                     if room not in labs:
                         continue
                     
-                    if cls.hours == 3:
+                    if cls.original_hours == 3:
                         # For 3 hour labs
                         if current_timeslot+2 >= len(timings):
                             continue
