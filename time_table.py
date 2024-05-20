@@ -111,12 +111,13 @@ def print_time_table(time_table):
     for day, slots in time_table.items():
         current_day = []
         for slot, rooms in slots.items():
-                slot_data = ''
+                slot_data = PrettyTable()
+                slot_data.field_names = ['Room', 'Faculty','Subject','Group']
                 for room, cls in rooms.items():
                     if cls:
-                        slot_data += room + cls.format() + '\n'
+                        slot_data.add_row([room,cls.faculty,cls.name_code,cls.group])
                     else:
-                        slot_data += room + 'No class scheduled' + '\n'
+                        slot_data.add_row([room, 'No','class','scheduled'])
                 current_day.append(slot_data)
         table.add_row([day] +current_day)
     mystring = table.get_string()
