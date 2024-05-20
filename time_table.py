@@ -227,8 +227,9 @@ def backtrack_schedule(time_table, classes):
     if cls is None:
         return True
     
+    priority = []
+    timings = list(timeslots.keys())
     for day in days:
-        timings = list(timeslots.keys())
         for current_timeslot, time in enumerate(timings):
             for i, room in enumerate(places):
                 if cls.class_type == 'L':
@@ -253,20 +254,8 @@ def backtrack_schedule(time_table, classes):
                             and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                             and cls.group not in [time_table[day][timings[current_timeslot+2]][r].group if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
                             and cls.hours > 0):
-                            time_table[day][time][room] = cls
-                            time_table[day][timings[current_timeslot+1]][room] = cls
-                            time_table[day][timings[current_timeslot+2]][room] = cls
-                            cls.hours -= 3
-                            print("Allotted",cls.format())
 
-                            if backtrack_schedule(time_table, classes):
-                                return True
-
-                            time_table[day][time][room] = None
-                            time_table[day][timings[current_timeslot+1]][room] = None
-                            time_table[day][timings[current_timeslot+2]][room] = None
-                            cls.hours += 3
-                            print("De-Allotted",cls.format())
+                            priority.append((day,current_timeslot,room))
                     
                     # For 2 hour labs
                     if current_timeslot+1 >= len(timings):
@@ -280,18 +269,9 @@ def backtrack_schedule(time_table, classes):
                         and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
                         and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                         and cls.hours > 0):
-                        time_table[day][time][room] = cls
-                        time_table[day][timings[current_timeslot+1]][room] = cls
-                        cls.hours -= 2
-                        print("Allotted",cls.format())
 
-                        if backtrack_schedule(time_table, classes):
-                            return True
+                        priority.append((day,current_timeslot,room))
 
-                        time_table[day][time][room] = None
-                        time_table[day][timings[current_timeslot+1]][room] = None
-                        cls.hours += 2
-                        print("De-Allotted",cls.format())
                 else:
                     # For regular classes
                     if room in labs:
@@ -300,16 +280,92 @@ def backtrack_schedule(time_table, classes):
                         and cls.faculty not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
                         and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
                         and cls.hours > 0):
-                        time_table[day][time][room] = cls
-                        cls.hours -= 1
-                        print("Allotted",cls.format())
 
-                        if backtrack_schedule(time_table, classes):
-                            return True
+                        priority.append((day,current_timeslot,room))
 
-                        time_table[day][time][room] = None
-                        cls.hours += 1
-                        print("De-Allotted",cls.format())
+    
+    # Sorting the priority list based on whether there was a previous class for the group or faculty
+    def sort_priority(allotable_location):
+        # This is kinda our heuristic function to make the previous greedy allotment a bit more cohesive.
+        day, current_timeslot, room = allotable_location
+        score = 0
+        # Cohesiveness based on previous class
+        if time_table[day][timings[current_timeslot-1]][room] and cls.group in [time_table[day][timings[current_timeslot-1]][room].group if time_table[day][timings[current_timeslot-1]][room] else None for room in places]:
+            score += 1
+        if time_table[day][timings[current_timeslot-1]][room] and cls.faculty in [time_table[day][timings[current_timeslot-1]][room].faculty if time_table[day][timings[current_timeslot-1]][room] else None for room in places]:
+            score += 1
+        # Prefer the class that leads to days with less than or equal to 5 hours of classes in a day
+        if sum([1 for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty]) <= 5:
+            score += 1
+        if sum([1 for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]) <= 5:
+            score += 1
+        # Prefer classes where the time difference between the first class and the last class (for both students and faculties) is less than  or equal to 6 hours
+        faculty_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty]
+        faculty_slots = [slot for slot in faculty_slots if slot not in ['M_BREAK','L_BREAK']]
+        if faculty_slots:
+            min_slot = min(faculty_slots)
+            max_slot = max(faculty_slots)
+            # Using ord instead of properly comparing hours cause I'm lazy
+            if ord(max_slot) - ord(min_slot) <= 4:
+                # 7 to include a break
+                score += 1
+        group_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]
+        group_slots = [slot for slot in group_slots if slot not in ['M_BREAK','L_BREAK']]
+        if group_slots:
+            min_slot = min(group_slots)
+            max_slot = max(group_slots)
+            # Using ord instead of properly comparing hours cause I'm lazy
+            if ord(max_slot) - ord(min_slot) <= 4:
+                # 7 to include a break
+                score += 1
+
+        return score
+
+    priority.sort(key=sort_priority, reverse=True)
+
+    for priority_loc in priority:
+        day, current_timeslot, room = priority_loc
+        hours = cls.hours
+        if cls.class_type == 'L':
+            if hours == 3:
+                time_table[day][timings[current_timeslot]][room] = cls
+                time_table[day][timings[current_timeslot+1]][room] = cls
+                time_table[day][timings[current_timeslot+2]][room] = cls
+                cls.hours -= 3
+                print("Allotted",cls.format())
+
+                if backtrack_schedule(time_table, classes):
+                    return True
+
+                time_table[day][timings[current_timeslot]][room] = None
+                time_table[day][timings[current_timeslot+1]][room] = None
+                time_table[day][timings[current_timeslot+2]][room] = None
+                cls.hours += 3
+                print("De-Allotted",cls.format())
+            elif hours == 2:
+                time_table[day][timings[current_timeslot]][room] = cls
+                time_table[day][timings[current_timeslot+1]][room] = cls
+                cls.hours -= 2
+                print("Allotted",cls.format())
+
+                if backtrack_schedule(time_table, classes):
+                    return True
+
+                time_table[day][timings[current_timeslot]][room] = None
+                time_table[day][timings[current_timeslot+1]][room] = None
+                cls.hours += 2
+                print("De-Allotted",cls.format())
+        else:
+            time_table[day][timings[current_timeslot]][room] = cls
+            cls.hours -= 1
+            print("Allotted",cls.format())
+
+            if backtrack_schedule(time_table, classes):
+                return True
+
+            time_table[day][timings[current_timeslot]][room] = None
+            cls.hours += 1
+            print("De-Allotted",cls.format())
     
     return False
 
