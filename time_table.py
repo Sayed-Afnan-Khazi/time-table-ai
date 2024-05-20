@@ -25,7 +25,13 @@ class Class:
     
     def format(self):
         return f"{self.faculty} - {self.name_code} - {self.group}"
-    
+
+class Break(Class):
+    def __init__(self) -> None:
+        self.faculty = None
+        self.name_code = None
+        self.group = None
+        self.hours = None
 # Read the csv file classes.csv
 def read_classes():
     classes = []
@@ -66,7 +72,7 @@ def init_time_table(days, timeslots, places):
             time_table[day][time] = {}
             for room in places:
                 if time == 'M_BREAK' or time == 'L_BREAK':
-                    time_table[day][time][room] = 'BREAK'
+                    time_table[day][time][room] = Break()
                 else:
                     time_table[day][time][room] = None
 
@@ -109,10 +115,45 @@ def backtrack_schedule(time_table, classes):
         for current_timeslot, time in enumerate(timings):
             for i, room in enumerate(places):
                 if cls.class_type == 'L':
+                    # For labs
                     if room not in labs:
                         continue
+                    
+                    if cls.hours == 3:
+                        # For 3 hour labs
+                        if current_timeslot+2 >= len(timings):
+                            continue
+                        if (time_table[day][time][room] is None
+                            and time_table[day][timings[current_timeslot+1]][room] is None
+                            and time_table[day][timings[current_timeslot+2]][room] is None
+                            and cls.faculty1 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
+                            and cls.faculty1 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
+                            and cls.faculty1 not in [time_table[day][timings[current_timeslot+2]][r].faculty if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
+                            and cls.faculty2 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
+                            and cls.faculty2 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
+                            and cls.faculty2 not in [time_table[day][timings[current_timeslot+2]][r].faculty if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
+                            and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
+                            and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
+                            and cls.group not in [time_table[day][timings[current_timeslot+2]][r].group if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
+                            and cls.hours > 0):
+                            time_table[day][time][room] = cls
+                            time_table[day][timings[current_timeslot+1]][room] = cls
+                            time_table[day][timings[current_timeslot+2]][room] = cls
+                            cls.hours -= 3
+                            print("Allotted",cls.format())
+
+                            if backtrack_schedule(time_table, classes):
+                                return True
+
+                            time_table[day][time][room] = None
+                            time_table[day][timings[current_timeslot+1]][room] = None
+                            time_table[day][timings[current_timeslot+2]][room] = None
+                            cls.hours += 3
+                            print("De-Allotted",cls.format())
+                    
+                    # For 2 hour labs
                     if current_timeslot+1 >= len(timings):
-                        continue
+                            continue
                     if (time_table[day][time][room] is None
                         and time_table[day][timings[current_timeslot+1]][room] is None
                         and cls.faculty1 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
@@ -121,8 +162,7 @@ def backtrack_schedule(time_table, classes):
                         and cls.faculty2 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
                         and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
                         and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
-                        and cls.hours > 1):
-                        # 3 hour labs?
+                        and cls.hours > 0):
                         time_table[day][time][room] = cls
                         time_table[day][timings[current_timeslot+1]][room] = cls
                         cls.hours -= 2
@@ -132,9 +172,11 @@ def backtrack_schedule(time_table, classes):
                             return True
 
                         time_table[day][time][room] = None
-                        cls.hours += 1
+                        time_table[day][timings[current_timeslot+1]][room] = None
+                        cls.hours += 2
                         print("De-Allotted",cls.format())
                 else:
+                    # For regular classes
                     if room in labs:
                         continue
                     if (time_table[day][time][room] is None
