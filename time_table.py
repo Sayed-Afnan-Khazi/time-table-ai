@@ -36,12 +36,19 @@ class Break(Class):
     def format(self):
         return str(None)
 
+
+faculties_set = set()
+groups_set = set()
+
 # Read the csv file classes.csv
 def read_classes():
+    global faculties_set, groups_set
     classes = []
     with open('classes.csv', 'r') as file:
         for line in file:
             faculty, name_code, group, hours = line.strip().split(',')
+            faculties_set.add(faculty)
+            groups_set.add(group)
             classes.append(Class(faculty, name_code, group, int(hours)))
     return classes
 
@@ -123,7 +130,87 @@ def print_time_table(time_table):
     mystring = table.get_string()
     with open(os.path.join(output_dir, f"allinone.txt"), 'w') as file:
         file.write(mystring)
-        
+
+    # class "group" wise
+    output_dir = 'tabular_outputs/groupwise_outputs'
+    os.makedirs(output_dir, exist_ok=True)
+
+    for group in groups_set:
+        table = PrettyTable()
+        table.set_style(DOUBLE_BORDER)
+        table.border = True
+        table.field_names = ["Day"] + [timeslots[slot] for slot in slots]
+        for day, slots in time_table.items():
+            current_day = []
+            for slot, rooms in slots.items():
+                scheduled_flag = False
+                for room, cls in rooms.items():
+                    if cls and cls.group == group:
+                        slot_data = f"{room} - {cls.faculty} - {cls.name_code}"
+                        scheduled_flag = True
+                else:
+                    if scheduled_flag:
+                        current_day.append(slot_data)
+                    else:
+                        current_day.append('No class scheduled')
+            table.add_row([day] +current_day)
+        mystring = table.get_string()
+        with open(os.path.join(output_dir, f"{group}.txt"), 'w') as file:
+            file.write(mystring)
+    
+    # faculty wise
+    output_dir = 'tabular_outputs/facultywise_outputs'
+    os.makedirs(output_dir, exist_ok=True)
+
+    for faculty in faculties_set:
+        table = PrettyTable()
+        table.set_style(DOUBLE_BORDER)
+        table.border = True
+        table.field_names = ["Day"] + [timeslots[slot] for slot in slots]
+        for day, slots in time_table.items():
+            current_day = []
+            for slot, rooms in slots.items():
+                scheduled_flag = False
+                for room, cls in rooms.items():
+                    if cls and cls.faculty == faculty:
+                        slot_data = f"{room} - {cls.group} - {cls.name_code}"
+                        scheduled_flag = True
+                else:
+                    if scheduled_flag:
+                        current_day.append(slot_data)
+                    else:
+                        current_day.append('No class scheduled')
+            table.add_row([day] +current_day)
+        mystring = table.get_string()
+        with open(os.path.join(output_dir, f"{faculty}.txt"), 'w') as file:
+            file.write(mystring)
+    
+    # room wise
+    output_dir = 'tabular_outputs/roomwise_outputs'
+    os.makedirs(output_dir, exist_ok=True)
+
+    for room in places:
+        table = PrettyTable()
+        table.set_style(DOUBLE_BORDER)
+        table.border = True
+        table.field_names = ["Day"] + [timeslots[slot] for slot in slots]
+        for day, slots in time_table.items():
+            current_day = []
+            for slot, rooms in slots.items():
+                scheduled_flag = False
+                for r, cls in rooms.items():
+                    if cls and r == room:
+                        slot_data = f"{cls.faculty} - {cls.group} - {cls.name_code}"
+                        scheduled_flag = True
+                else:
+                    if scheduled_flag:
+                        current_day.append(slot_data)
+                    else:
+                        current_day.append('No class scheduled')
+            table.add_row([day] +current_day)
+        mystring = table.get_string()
+        with open(os.path.join(output_dir, f"{room}.txt"), 'w') as file:
+            file.write(mystring)
 
 
 def class_to_allot(classes):
