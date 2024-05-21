@@ -20,6 +20,8 @@ class Class:
         else:
             # For theory classes
             self.class_type = 'T'
+            self.faculty1 = None # Should we put the faculty's name in this?
+            self.faculty2 = None
 
     def __str__(self):
         return f"{self.faculty} conducting {self.hours} of {self.name_code}"
@@ -244,15 +246,9 @@ def backtrack_schedule(time_table, classes):
                         if (time_table[day][time][room] is None
                             and time_table[day][timings[current_timeslot+1]][room] is None
                             and time_table[day][timings[current_timeslot+2]][room] is None
-                            and cls.faculty1 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
-                            and cls.faculty1 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
-                            and cls.faculty1 not in [time_table[day][timings[current_timeslot+2]][r].faculty if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
-                            and cls.faculty2 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
-                            and cls.faculty2 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
-                            and cls.faculty2 not in [time_table[day][timings[current_timeslot+2]][r].faculty if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
-                            and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
-                            and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
-                            and cls.group not in [time_table[day][timings[current_timeslot+2]][r].group if time_table[day][timings[current_timeslot+2]][r] else None for r in places]
+                            and cls.faculty1 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)]
+                            and cls.faculty2 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)]
+                            and cls.group not in [time_table[day][timings[current_timeslot+i]][r].group if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(3)]
                             and cls.hours > 0):
 
                             priority.append((day,current_timeslot,room))
@@ -262,12 +258,9 @@ def backtrack_schedule(time_table, classes):
                             continue
                     if (time_table[day][time][room] is None
                         and time_table[day][timings[current_timeslot+1]][room] is None
-                        and cls.faculty1 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
-                        and cls.faculty1 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
-                        and cls.faculty2 not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
-                        and cls.faculty2 not in [time_table[day][timings[current_timeslot+1]][r].faculty if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
-                        and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
-                        and cls.group not in [time_table[day][timings[current_timeslot+1]][r].group if time_table[day][timings[current_timeslot+1]][r] else None for r in places]
+                        and cls.faculty1 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
+                        and cls.faculty2 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
+                        and cls.group not in [time_table[day][timings[current_timeslot+i]][r].group if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
                         and cls.hours > 0):
 
                         priority.append((day,current_timeslot,room))
@@ -277,7 +270,7 @@ def backtrack_schedule(time_table, classes):
                     if room in labs:
                         continue
                     if (time_table[day][time][room] is None
-                        and cls.faculty not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places]
+                        and cls.faculty not in [time_table[day][time][r].faculty if time_table[day][time][r] else None for r in places] + [time_table[day][time][r].faculty1 if time_table[day][time][r] else None for r in places] + [time_table[day][time][r].faculty2 if time_table[day][time][r] else None for r in places]
                         and cls.group not in [time_table[day][time][r].group if time_table[day][time][r] else None for r in places]
                         and cls.hours > 0):
 
@@ -306,7 +299,7 @@ def backtrack_schedule(time_table, classes):
             min_slot = min(faculty_slots)
             max_slot = max(faculty_slots)
             # Using ord instead of properly comparing hours cause I'm lazy
-            if ord(max_slot) - ord(min_slot) <= 4:
+            if ord(max_slot) - ord(min_slot) <= 5:
                 # 7 to include a break
                 score += 1
         group_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]
@@ -315,7 +308,7 @@ def backtrack_schedule(time_table, classes):
             min_slot = min(group_slots)
             max_slot = max(group_slots)
             # Using ord instead of properly comparing hours cause I'm lazy
-            if ord(max_slot) - ord(min_slot) <= 4:
+            if ord(max_slot) - ord(min_slot) <= 5:
                 # 7 to include a break
                 score += 1
 
