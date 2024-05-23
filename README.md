@@ -2,7 +2,7 @@
 
 Credits: @Sayed-Afnan-Khazi
 
-A university class scheduling program that uses an backtracking approach to generate timetables for classes, faculty, and rooms.
+A university class scheduling program that uses a backtracking approach to generate timetables for classes, faculty, and rooms.
 
 ## How to run
 
