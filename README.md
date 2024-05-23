@@ -1,6 +1,6 @@
 # time-table-ai
 
-Credits: @Sayed-Afnan-Khazi
+Credits: [@Sayed-Afnan-Khazi](https://github.com/Sayed-Afnan-Khazi)
 
 A university class scheduling program that uses a backtracking approach to generate timetables for classes, faculty, and rooms.
 
