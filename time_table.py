@@ -4,6 +4,23 @@ import csv
 import os
 from prettytable import PrettyTable, from_csv, DOUBLE_BORDER
 
+# Days of the week: (Monday-Saturday) # Need to implement Saturday till 1:30PM
+days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+# timeslots are represented as:
+# A(7:30-8:30), B(8:30-9:30), C(9:30-10:30),
+# D(11:00-11:50), E(11:50-12:40), F(12:40-1:30),
+# G(2:30-3:30), H(3:30-4:30), I(4:30-5:30)
+timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
+
+# rooms: IS101, IS102, IS103 (for now)
+rooms = ['IS101', 'IS102', 'IS103']
+
+# labs: ISLAB1, ISLAB2 (for now)
+labs = ['ISLAB1', 'ISLAB2']
+
+places = rooms + labs
+
 class Class:
     def __init__(self, faculty, name_code, group, hours):
         self.faculty = faculty
@@ -38,47 +55,63 @@ class Break(Class):
         self.hours = None
     def format(self):
         return str(None)
+    
+class FixedClass(Class):
+    # Note: Labs aren't considered for fixed classes for now
+    def __init__(self, faculty, name_code, group, day, time):
+        self.faculty = faculty
+        self.name_code = name_code
+        self.group = group
+        if day not in days:
+            raise ValueError("Invalid day, refer format for days of the week")
+        else: 
+            self.day = day
+        if time not in timeslots.keys():
+            raise ValueError("Invalid time, refer format for timeslot keys")
+        else:
+            self.time = time
+        if self.name_code.endswith('L'):
+            raise Warning("Labs are not considered for fixed classes for now, please remove the 'L' from the name_code in fixed_classes.csv file. This clas will be considered as a theory class.")
+        self.class_type = 'T'
+        self.faculty1 = None # Should improve this with a super() call in the future.
+        self.faculty2 = None
+    
+    def format(self):
+        return f"{self.faculty} - {self.name_code} - {self.group} [PRE-ALLOTTED]"
+ 
 
-
+# Global variables
+classes = []
+fixed_classes = []
 faculties_set = set()
 groups_set = set()
 
-# Read the csv file classes.csv
+# Read the csv files
 def read_classes():
-    global faculties_set, groups_set
-    classes = []
+    global faculties_set, groups_set, classes, fixed_classes
     with open('classes.csv', 'r') as file:
         for line in file:
             faculty, name_code, group, hours = line.strip().split(',')
+            faculty, name_code, group, hours = faculty.strip(), name_code.strip(), group.strip(), hours.strip()
             faculties_set.add(faculty)
             groups_set.add(group)
             classes.append(Class(faculty, name_code, group, int(hours)))
-    return classes
+    with open('fixed_classes.csv', 'r') as file:
+        for line in file:
+            faculty, name_code, group, day, time = line.strip().split(',')
+            faculty, name_code, group, day, time = faculty.strip(), name_code.strip(), group.strip(), day.strip(), time.strip()
+            faculties_set.add(faculty)
+            groups_set.add(group)
+            fixed_classes.append(FixedClass(faculty, name_code, group, day, time))
+    return classes, fixed_classes
 
-## Structure of the 3D hash table:
+## Structure of the 3D hash table (time table):
 
 # { day_of_week: {time: {room: [Class] | None }}}
 
-# Parameters Considered:
-
-# day_of_week: 1-6 (Monday-Saturday) # Need to implement Saturday till 1:30PM
-days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-
-# timeslots are represented as:
-# A(7:30-8:30), B(8:30-9:30), C(9:30-10:30),
-# D(11:00-11:50), E(11:50-12:40), F(12:40-1:30),
-# G(2:30-3:30), H(3:30-4:30), I(4:30-5:30)
-timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
-
-# rooms: IS101, IS102, IS103 (for now)
-rooms = ['IS101', 'IS102', 'IS103']
-
-# labs: ISLAB1, ISLAB2 (for now)
-labs = ['ISLAB1', 'ISLAB2']
-
-places = rooms + labs
-
-def init_time_table(days, timeslots, places):
+def init_time_table():
+    global days, timeslots, places
+    # Initialize the time table
     time_table = {}
     for day in days:
         time_table[day] = {}
@@ -90,6 +123,17 @@ def init_time_table(days, timeslots, places):
                 else:
                     time_table[day][time][room] = None
 
+    # Allot fixed classes
+    shuffled_rooms = list(rooms)
+    random.shuffle(shuffled_rooms)
+    for fixed_class in fixed_classes:
+        for possible_room in shuffled_rooms:
+            if time_table[fixed_class.day][fixed_class.time][possible_room] is None:
+                time_table[fixed_class.day][fixed_class.time][possible_room] = fixed_class
+                break
+        else:
+            raise ValueError(f"Could not pre-allot fixed class, {fixed_class.format()} (A clash possibly occurred, please check your fixed_classes.csv file)")
+    
     return time_table
 
 def print_time_table(time_table):
@@ -253,18 +297,19 @@ def backtrack_schedule(time_table, classes):
                             and cls.hours > 0):
 
                             priority.append((day,current_timeslot,room))
-                    
-                    # For 2 hour labs
-                    if current_timeslot+1 >= len(timings):
-                            continue
-                    if (time_table[day][time][room] is None
-                        and time_table[day][timings[current_timeslot+1]][room] is None
-                        and cls.faculty1 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
-                        and cls.faculty2 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
-                        and cls.group not in [time_table[day][timings[current_timeslot+i]][r].group if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
-                        and cls.hours > 0):
 
-                        priority.append((day,current_timeslot,room))
+                    if cls.original_hours == 2:
+                        # For 2 hour labs
+                        if current_timeslot+1 >= len(timings):
+                                continue
+                        if (time_table[day][time][room] is None
+                            and time_table[day][timings[current_timeslot+1]][room] is None
+                            and cls.faculty1 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
+                            and cls.faculty2 not in [time_table[day][timings[current_timeslot+i]][r].faculty if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty1 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)] + [time_table[day][timings[current_timeslot+i]][r].faculty2 if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
+                            and cls.group not in [time_table[day][timings[current_timeslot+i]][r].group if time_table[day][timings[current_timeslot+i]][r] else None for r in places for i in range(2)]
+                            and cls.hours > 0):
+
+                            priority.append((day,current_timeslot,room))
 
                 else:
                     # For regular classes
@@ -368,7 +413,7 @@ def schedule_classes(time_table, classes):
 
 
 if __name__ == '__main__':
-    classes = read_classes()
-    time_table = init_time_table(days, timeslots, places)
+    classes, fixed_classes = read_classes()
+    time_table = init_time_table()
     print(schedule_classes(time_table, classes))
     print_time_table(time_table)
