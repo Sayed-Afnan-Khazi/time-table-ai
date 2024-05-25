@@ -4,7 +4,7 @@ import csv
 import os
 from prettytable import PrettyTable, from_csv, DOUBLE_BORDER
 
-# Days of the week: (Monday-Saturday) # Need to implement Saturday till 1:30PM
+# Days of the week: (Monday-Saturday) and Saturday till 1:30PM is included. (check init_time_table() for more info
 days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
 # timeslots are represented as:
@@ -115,10 +115,13 @@ def init_time_table():
     time_table = {}
     for day in days:
         time_table[day] = {}
-        for time in timeslots.keys():
+        timings = list(timeslots.keys())
+        for time in timings:
             time_table[day][time] = {}
             for room in places:
                 if time == 'M_BREAK' or time == 'L_BREAK':
+                    time_table[day][time][room] = Break()
+                elif day == 'Saturday' and timings.index(time) >= 7:
                     time_table[day][time][room] = Break()
                 else:
                     time_table[day][time][room] = None
@@ -323,21 +326,20 @@ def backtrack_schedule(time_table, classes):
                         priority.append((day,current_timeslot,room))
 
     
-    # Sorting the priority list based on whether there was a previous class for the group or faculty
     def sort_priority(allotable_location):
         # This is kinda our heuristic function to make the previous greedy allotment a bit more cohesive.
         day, current_timeslot, room = allotable_location
         score = 0
         # Cohesiveness based on previous class
         if time_table[day][timings[current_timeslot-1]][room] and cls.group in [time_table[day][timings[current_timeslot-1]][room].group if time_table[day][timings[current_timeslot-1]][room] else None for room in places]:
-            score += 1
+            score += 3
         if time_table[day][timings[current_timeslot-1]][room] and cls.faculty in [time_table[day][timings[current_timeslot-1]][room].faculty if time_table[day][timings[current_timeslot-1]][room] else None for room in places]:
-            score += 1
+            score += 3
         # Prefer the class that leads to days with less than or equal to 5 hours of classes in a day
         if sum([1 for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty]) <= 5:
-            score += 1
+            score += 4
         if sum([1 for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]) <= 5:
-            score += 1
+            score += 4
         # Prefer classes where the time difference between the first class and the last class (for both students and faculties) is less than  or equal to 6 hours
         faculty_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty]
         faculty_slots = [slot for slot in faculty_slots if slot not in ['M_BREAK','L_BREAK']]
@@ -345,18 +347,18 @@ def backtrack_schedule(time_table, classes):
             min_slot = min(faculty_slots)
             max_slot = max(faculty_slots)
             # Using ord instead of properly comparing hours cause I'm lazy
-            if ord(max_slot) - ord(min_slot) <= 5:
+            if ord(max_slot) - ord(min_slot) <= 6:
                 # 7 to include a break
-                score += 1
+                score += 3
         group_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]
         group_slots = [slot for slot in group_slots if slot not in ['M_BREAK','L_BREAK']]
         if group_slots:
             min_slot = min(group_slots)
             max_slot = max(group_slots)
             # Using ord instead of properly comparing hours cause I'm lazy
-            if ord(max_slot) - ord(min_slot) <= 5:
+            if ord(max_slot) - ord(min_slot) <= 6:
                 # 7 to include a break
-                score += 1
+                score += 3
 
         return score
 
