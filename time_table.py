@@ -330,16 +330,20 @@ def backtrack_schedule(time_table, classes):
         # This is kinda our heuristic function to make the previous greedy allotment a bit more cohesive.
         day, current_timeslot, room = allotable_location
         score = 0
-        # Cohesiveness based on previous class
-        if time_table[day][timings[current_timeslot-1]][room] and cls.group in [time_table[day][timings[current_timeslot-1]][room].group if time_table[day][timings[current_timeslot-1]][room] else None for room in places]:
-            score += 3
-        if time_table[day][timings[current_timeslot-1]][room] and cls.faculty in [time_table[day][timings[current_timeslot-1]][room].faculty if time_table[day][timings[current_timeslot-1]][room] else None for room in places]:
-            score += 3
+        # Cohesiveness based on previous classes in the same room
+        i = 1
+        while current_timeslot-i>=0 and time_table[day][timings[current_timeslot-i]][room] and cls.group in [time_table[day][timings[current_timeslot-i]][room].group if time_table[day][timings[current_timeslot-i]][room] else None for room in places]:
+            score += 1
+            i += 1
+        i = 1
+        while current_timeslot-i>=0 and time_table[day][timings[current_timeslot-i]][room] and cls.faculty in [time_table[day][timings[current_timeslot-i]][room].faculty if time_table[day][timings[current_timeslot-i]][room] else None for room in places]:
+            score += 1
+            i += 1
         # Prefer the class that leads to days with less than or equal to 5 hours of classes in a day
-        if sum([1 for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty]) <= 5:
-            score += 4
-        if sum([1 for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]) <= 5:
-            score += 4
+        if sum([1 if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty else 0 for slot in timings for room in places]) <= 5:
+            score += 5
+        if sum([1 if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group else 0 for slot in timings for room in places]) <= 5:
+            score += 5
         # Prefer classes where the time difference between the first class and the last class (for both students and faculties) is less than  or equal to 6 hours
         faculty_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].faculty == cls.faculty]
         faculty_slots = [slot for slot in faculty_slots if slot not in ['M_BREAK','L_BREAK']]
@@ -347,18 +351,19 @@ def backtrack_schedule(time_table, classes):
             min_slot = min(faculty_slots)
             max_slot = max(faculty_slots)
             # Using ord instead of properly comparing hours cause I'm lazy
-            if ord(max_slot) - ord(min_slot) <= 6:
+            if ord(max_slot) - ord(min_slot) <= 5:
                 # 7 to include a break
-                score += 3
+                score += 5
         group_slots = [slot for slot in timings if time_table[day][slot][room] and time_table[day][slot][room].group == cls.group]
         group_slots = [slot for slot in group_slots if slot not in ['M_BREAK','L_BREAK']]
         if group_slots:
             min_slot = min(group_slots)
             max_slot = max(group_slots)
+            
             # Using ord instead of properly comparing hours cause I'm lazy
-            if ord(max_slot) - ord(min_slot) <= 6:
+            if ord(max_slot) - ord(min_slot) <= 5:
                 # 7 to include a break
-                score += 3
+                score += 5
 
         return score
 
