@@ -1,0 +1,15 @@
+This file should contain all faculties that can be allotted a maximum of one lab second faculty role. The file should be in the following format:
+
+faculty1
+faculty2
+faculty3
+faculty4
+
+Example:
+
+VBK
+TM
+MPS
+...
+
+NOTE: The number of faculties here must be greater than or equal to the number of faculties to be auto-allotted to labs.

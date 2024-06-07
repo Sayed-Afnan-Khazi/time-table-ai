@@ -21,6 +21,17 @@ labs = ['ISLAB1', 'ISLAB2']
 
 places = rooms + labs
 
+def get_lab_professors():
+    # Read from csv file
+    lab_professors = set()
+    with open('lab_professors.csv', 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            lab_professors.add(row[0].strip())
+    return lab_professors
+
+lab_professors_allotable = get_lab_professors()
+
 class Class:
     def __init__(self, faculty, name_code, group, hours):
         self.faculty = faculty
@@ -33,8 +44,40 @@ class Class:
             # For laboratory classes
             self.class_type = 'L'
             faculties = self.faculty.split('+')
-            self.faculty1 = faculties[0]
-            self.faculty2 = faculties[1]
+            if len(faculties) == 2:
+                # Both faculties were specified for the lab
+                self.faculty1 = faculties[0]
+                self.faculty2 = faculties[1]
+                lab_professors_allotable.discard(faculties[0]) # Just in case
+                lab_professors_allotable.discard(faculties[1]) # Just in case
+            if len(faculties) == 1:
+                # Only one faculty was specified for the lab
+                if faculties[0] in lab_professors_allotable:
+                    # The main faculty assigned is in the lab professors list
+                    # Assign to the lab and remove from the set
+                    self.faculty1 = faculties[0]
+                    # Pick a random lab professor
+                    try:
+                        self.faculty2 = random.choice(list(lab_professors_allotable))
+                        while self.faculty2 == self.faculty1:
+                            self.faculty2 = random.choice(list(lab_professors_allotable))
+                    except IndexError:
+                        raise IndexError("No lab professors left to allot, please add more lab professors in lab_professors.csv file.")
+                    
+                    self.faculty = self.faculty1 + '+' + self.faculty2
+                else:
+                    # The main faculty assigned is not in the lab professors list
+                    # Pick a random lab professor
+                    self.faculty1 = faculties[0]
+                    try:
+                        self.faculty2 = random.choice(list(lab_professors_allotable))
+                        while self.faculty2 == self.faculty1:
+                            self.faculty2 = random.choice(list(lab_professors_allotable))
+                    except IndexError:
+                        raise IndexError("No lab professors left to allot, please add more lab professors in lab_professors.csv file.")
+                    self.faculty = self.faculty1 + '+' + self.faculty2
+                # lab_professors_allotable.discard(faculties[0]) 
+                # lab_professors_allotable.discard(self.faculty2)
         else:
             # For theory classes
             self.class_type = 'T'
@@ -45,7 +88,10 @@ class Class:
         return f"{self.faculty} conducting {self.hours} of {self.name_code}"
     
     def format(self):
-        return f"{self.faculty} - {self.name_code} - {self.group}"
+        if self.class_type == 'L':
+            return f"{self.faculty1} + {self.faculty2} - {self.name_code} - {self.group}"
+        else:
+            return f"{self.faculty} - {self.name_code} - {self.group}"
 
 class Break(Class):
     def __init__(self) -> None:
