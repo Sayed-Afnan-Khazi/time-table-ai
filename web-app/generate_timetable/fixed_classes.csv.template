@@ -2,7 +2,7 @@ The format is for classes of 1 hour, to schedule multiple classes, put them in n
 
 > Format:
 
-Course facilitator, course code (represents the subject), class (group of students), day, timeslot
+    Course facilitator, course code (represents the subject), class (group of students), day, timeslot
 
 > Days:
 Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
