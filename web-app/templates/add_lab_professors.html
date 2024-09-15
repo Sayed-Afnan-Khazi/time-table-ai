@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Lab Professor{% endblock %}
+
+{% block content %}
+<div class="container-sm mt-4 px-4 mx-5">
+    <h2>Add Lab Professor</h2>
+    <form action="/add_lab_professors" method="POST" class="mt-4 mx-5">
+        <div class="form-group mt-3">
+            <label for="professor_name">Professor Name (like RMK,...)</label>
+            <input type="text" class="form-control" id="professor_name" name="professor_name" required>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Add Lab Professor</button>
+    </form>
+    <h3 class="mt-5">Existing Lab Professors</h3>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Professor Name</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for professor in lab_professors %}
+            <tr>
+                <td>{{ professor[1] }}</td>
+                <td>
+                    <a href="/delete_lab_professor/{{ professor[0] }}" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+    

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Classes{% endblock %}
+
+{% block content %}
+<div class="container-sm mt-4 px-4 mx-5">
+    <h2>Add classes</h2>
+    <form action="/add_classes" method="POST" class="mt-4 mx-5">
+        <div class="form-group">
+            <label for="course_facilitator">Course facilitator (Shorthand, like RMK)</label>
+            <input type="text" class="form-control" id="course_facilitator" name="course_facilitator" required>
+        </div>
+        <div class="form-group">
+            <label for="course_code">Course Code</label>
+            <input type="text" class="form-control" id="course_code" name="course_code" required>
+        </div>
+        <div class="form-group">
+            <label for="course_group">Group to attend this course (like: CSBS-4, ISE-5, ...)</label>
+            <input type="text" class="form-control" id="course_group" name="course_group" required>
+        </div>
+        <div>
+            <label for="course_hours_required">Course Hours Required Per Week</label>
+            <input type="number" min="1" max="6" step="1" class="form-control" id="course_hours_required" name="course_hours_required" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Add Class</button>
+    </form>
+    <h3 class="mt-5">Existing Classes</h3>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Course Facilitator</th>
+                <th scope="col">Course Code</th>
+                <th scope="col">Course Group</th>
+                <th scope="col">Course Hours Required Per Week</th>
+                <th scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in classes %}
+            <tr>
+                <td>{{ class[1][0] }}</td>
+                <td>{{ class[1][1] }}</td>
+                <td>{{ class[1][2] }}</td>
+                <td>{{ class[1][3] }}</td>
+                <td>
+                    <a href="/delete_class/{{ class[0] }}" class="btn btn-danger">Delete</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
