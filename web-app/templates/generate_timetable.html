@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirm details and generate timetable:{% endblock %}
+
+{% block content %}
+<div class="container-sm mt-4 px-4 mx-5">
+    <h1>Confirm details and generate timetable:</h1>
+    <h3>Selected classes:</h3>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Course Facilitator</th>
+                <th scope="col">Course Code</th>
+                <th scope="col">Course Group</th>
+                <th scope="col">Course Hours Required Per Week</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for class in classes %}
+            <tr>
+                <td>{{ class[1][0] }}</td>
+                <td>{{ class[1][1] }}</td>
+                <td>{{ class[1][2] }}</td>
+                <td>{{ class[1][3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/add_classes" class="btn btn-primary mt-3">Add more / Modify classes</a>
+    <h3>Selected Fixed Classes:</h3>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Course Facilitator</th>
+                <th scope="col">Course Code</th>
+                <th scope="col">Course Group</th>
+                <th scope="col">Course Hours Required Per Week</th>
+                <th scope="col">Day</th>
+                <th scope="col">Timeslot</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for fixed_class in fixed_classes %}
+            <tr>
+                <td>{{ fixed_class[1][0] }}</td>
+                <td>{{ fixed_class[1][1] }}</td>
+                <td>{{ fixed_class[1][2] }}</td>
+                <td>{{ fixed_class[1][3] }}</td>
+                <td>{{ fixed_class[1][4] }}</td>
+                <td>{{ fixed_class[1][5] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/add_fixed_classes" class="btn btn-primary mt-3">Add more / Modify fixed classes</a>
+    <h3>Professors to be considered for second professors in labs which do not specify a second lab professor:</h3>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Professor Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for professor in lab_professors %}
+            <tr>
+                <td>{{ professor[1] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <a href="/add_lab_professors" class="btn btn-primary mt-3">Add more / Modify lab professors</a>
+    <form action="{{ url_for('generate_timetable') }}" method="post">
+        <input type="submit" class="btn btn-success mt-3" value="Generate timetable">
+    </form>
+</div>
+{% endblock %}

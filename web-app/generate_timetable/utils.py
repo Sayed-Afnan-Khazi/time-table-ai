@@ -1,5 +1,5 @@
 import csv
-def classes_to_csv(classes,csv_file_path='./generate_timetable/classes.csv'):
+def classes_to_csv(classes,csv_file_path='./generate_timetable/inputs/classes.csv'):
     '''Format expected:
         Course facilitator, course code (represents the subject), class (group of students), hours required per week
 
@@ -14,7 +14,7 @@ Example:
         for iclass in classes:
             writer.writerow(iclass)
 
-def fixed_classes_to_csv(classes,csv_file_path='./generate_timetable/fixed_classes.csv'):
+def fixed_classes_to_csv(classes,csv_file_path='./generate_timetable/inputs/fixed_classes.csv'):
     '''The format is for classes of 1 hour, to schedule multiple classes, put them in new lines:
 
 > Format:
@@ -46,7 +46,7 @@ G(2:30-3:30), H(3:30-4:30), I(4:30-5:30)
         for iclass in classes:
             writer.writerow(iclass)
 
-def lab_professors_to_csv(professors,csv_file_path='./generate_timetable/lab_professors.csv'):
+def lab_professors_to_csv(professors,csv_file_path='./generate_timetable/inputs/lab_professors.csv'):
     '''Takes a list of professors and writes them to a csv file.
     expects a list of professors like: ['prof1','prof2','prof3']'''
     with open(csv_file_path, mode='w') as file:

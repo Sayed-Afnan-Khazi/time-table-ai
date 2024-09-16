@@ -4,31 +4,34 @@ import csv
 import os
 from prettytable import PrettyTable, from_csv, DOUBLE_BORDER
 
-def generate_time_table(days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 
-                        timeslots={'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}, 
-                        rooms=['IS101', 'IS002', 'IS103','IS001'], 
-                        labs=['ISLAB1', 'ISLAB2'],base_output_dir='../outputs'):
-    # Days of the week: (Monday-Saturday) and Saturday till 1:30PM is included. (check init_time_table() for more info
-    # days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+def generate_time_table():
+        # days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], 
+        # timeslots={'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}, 
+        # rooms=['IS101', 'IS002', 'IS103','IS001'], 
+        # labs=['ISLAB1', 'ISLAB2'],base_output_dir='./generate_timetable/outputs', base_input_dir='./generate_timetable/inputs'):
+    base_output_dir='./generate_timetable/outputs'
+    base_input_dir='./generate_timetable/inputs'
 
+    # Days of the week: (Monday-Saturday) and Saturday till 1:30PM is included. (check init_time_table() for more info
+    days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
     # timeslots are represented as:
     # A(7:30-8:30), B(8:30-9:30), C(9:30-10:30),
     # D(11:00-11:50), E(11:50-12:40), F(12:40-1:30),
     # G(2:30-3:30), H(3:30-4:30), I(4:30-5:30)
-    # timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
+    timeslots = {'A': '7:30-8:30', 'B': '8:30-9:30', 'C': '9:30-10:30', 'M_BREAK':'10:30-11:00','D': '11:00-11:50', 'E': '11:50-12:40', 'F': '12:40-13:30', 'L_BREAK':'13:30-14:30','G': '14:30-15:30', 'H': '15:30-16:30', 'I': '16:30-17:30'}
 
     # rooms: IS101, IS102, IS103 (for now)
-    # rooms = ['IS101', 'IS002', 'IS103','IS001']
+    rooms = ['IS101', 'IS002', 'IS103','IS001']
 
     # labs: ISLAB1, ISLAB2 (for now)
-    # labs = ['ISLAB1', 'ISLAB2']
+    labs = ['ISLAB1', 'ISLAB2']
 
     places = rooms + labs
 
     def get_lab_professors():
         # Read from csv file
         lab_professors = set()
-        with open('lab_professors.csv', 'r') as file:
+        with open(base_input_dir+'/lab_professors.csv', 'r') as file:
             reader = csv.reader(file)
             for row in reader:
                 lab_professors.add(row[0].strip())
@@ -128,7 +131,7 @@ def generate_time_table(days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
         
         def format(self):
             return f"{self.faculty} - {self.name_code} - {self.group} [PRE-ALLOTTED]"
-    
+
 
     # Global variables
     classes = []
@@ -138,15 +141,14 @@ def generate_time_table(days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 
     # Read the csv files
     def read_classes():
-        global faculties_set, groups_set, classes, fixed_classes
-        with open('classes.csv', 'r') as file:
+        with open(base_input_dir+'/classes.csv', 'r') as file:
             for line in file:
                 faculty, name_code, group, hours = line.strip().split(',')
                 faculty, name_code, group, hours = faculty.strip(), name_code.strip(), group.strip(), hours.strip()
                 faculties_set.add(faculty)
                 groups_set.add(group)
                 classes.append(Class(faculty, name_code, group, int(hours)))
-        with open('fixed_classes.csv', 'r') as file:
+        with open(base_input_dir+'/fixed_classes.csv', 'r') as file:
             for line in file:
                 faculty, name_code, group, day, time = line.strip().split(',')
                 faculty, name_code, group, day, time = faculty.strip(), name_code.strip(), group.strip(), day.strip(), time.strip()
@@ -160,7 +162,6 @@ def generate_time_table(days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
     # { day_of_week: {time: {room: [Class] | None }}}
 
     def init_time_table():
-        global days, timeslots, places
         # Initialize the time table
         time_table = {}
         for day in days:
@@ -191,7 +192,6 @@ def generate_time_table(days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 
     def print_time_table(time_table):
         # Note to self: You can directly convert prettytable to HTML and display it on a webpage.
-        global timeslots
         output_dir = base_output_dir
         os.makedirs(output_dir, exist_ok=True)
         
@@ -467,12 +467,12 @@ def generate_time_table(days=['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fri
 
     def schedule_classes(time_table, classes):
         return backtrack_schedule(time_table, classes)
-
-
+    
     classes, fixed_classes = read_classes()
     time_table = init_time_table()
     print(schedule_classes(time_table, classes))
     print_time_table(time_table)
+
 
 if __name__ == '__main__':
     generate_time_table()
