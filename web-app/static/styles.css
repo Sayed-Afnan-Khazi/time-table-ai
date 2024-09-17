@@ -4,3 +4,37 @@ html, body {
     font-family: Helvetica;
     background-color: #f0f0f0;
 }
+
+.table-wrapper {
+    margin: 0 auto;
+    max-width: 95vw;
+    padding: 10px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: auto;
+}
+
+
+.table-wrapper > table {
+    border: black;
+    text-align: left;
+}
+
+.table-wrapper > table > tbody > tr > td {
+    border: 1px solid #a6a6a6;
+}
+
+.table-wrapper > table > thead > tr > th {
+    background-color: #af4c4c;
+    color: white;
+    border: none;
+}
+
+.table-wrapper > table > tbody > tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+
+.table-wrapper > table > tbody > tr:hover {
+    background-color: #ddd;
+}

@@ -1,0 +1,104 @@
+<table>
+    <thead>
+        <tr>
+            <th>Day</th>
+            <th>7:30-8:30</th>
+            <th>8:30-9:30</th>
+            <th>9:30-10:30</th>
+            <th>10:30-11:00</th>
+            <th>11:00-11:50</th>
+            <th>11:50-12:40</th>
+            <th>12:40-13:30</th>
+            <th>13:30-14:30</th>
+            <th>14:30-15:30</th>
+            <th>15:30-16:30</th>
+            <th>16:30-17:30</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Monday</td>
+            <td>ISLAB1 - RMN+SU - B2-22CB240L</td>
+            <td>ISLAB1 - RMN+SU - B2-22CB240L</td>
+            <td>IS101 - RMN - 22CB240</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>IS101 - NC - 22CB220</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>ISLAB1 - TM+RMN - B2-22CB230L</td>
+            <td>ISLAB1 - TM+RMN - B2-22CB230L</td>
+            <td>IS101 - RMN - 22CB240</td>
+        </tr>
+        <tr>
+            <td>Tuesday</td>
+            <td>ISLAB1 - RMN+MPS - B1-22CB240L</td>
+            <td>ISLAB1 - RMN+MPS - B1-22CB240L</td>
+            <td>IS001 - TM - 22CB230</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>IS101 - NC - 22CB220</td>
+            <td>No class scheduled</td>
+            <td>ISLAB1 - TM+SN - B1-22CB230L</td>
+            <td>ISLAB1 - TM+SN - B1-22CB230L</td>
+            <td>IS001 - TM - 22CB230</td>
+        </tr>
+        <tr>
+            <td>Wednesday</td>
+            <td>IS002 - DSV - 22CB210</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>IS101 - NC - 22CB220</td>
+            <td>No class scheduled</td>
+            <td>IS101 - PM - 22CB260</td>
+            <td>IS002 - DSV - 22CB210</td>
+            <td>No class scheduled</td>
+        </tr>
+        <tr>
+            <td>Thursday</td>
+            <td>IS001 - LMS - 22CB250</td>
+            <td>IS001 - DSV - 22CB210</td>
+            <td>IS001 - TM - 22CB230</td>
+            <td>No class scheduled</td>
+            <td>IS001 - RMN - 22CB240</td>
+            <td>No class scheduled</td>
+            <td>IS001 - NC - 22CB220</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>IS001 - DSV - 22CB210</td>
+        </tr>
+        <tr>
+            <td>Friday</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+        </tr>
+        <tr>
+            <td>Saturday</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>IS001 - NC - 22CB220</td>
+            <td>IS101 - PM - 22CB260</td>
+            <td>IS101 - LMS - 22CB250</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+            <td>No class scheduled</td>
+        </tr>
+    </tbody>
+</table>

@@ -107,7 +107,7 @@ def generate_time_table():
             self.group = None
             self.hours = None
         def format(self):
-            return str(None)
+            return "BREAK"
         
     class FixedClass(Class):
         # Note: Labs aren't considered for fixed classes for now
@@ -228,7 +228,7 @@ def generate_time_table():
                             slot_data.add_row([room, 'No','class','scheduled'])
                     current_day.append(slot_data)
             table.add_row([day] +current_day)
-        mystring = table.get_string()
+        mystring = table.get_html_string()
         with open(os.path.join(output_dir, f"allinone.txt"), 'w') as file:
             file.write(mystring)
 
@@ -255,7 +255,7 @@ def generate_time_table():
                         else:
                             current_day.append('No class scheduled')
                 table.add_row([day] +current_day)
-            mystring = table.get_string()
+            mystring = table.get_html_string()
             with open(os.path.join(output_dir, f"{group}.txt"), 'w') as file:
                 file.write(mystring)
         
@@ -282,7 +282,7 @@ def generate_time_table():
                         else:
                             current_day.append('No class scheduled')
                 table.add_row([day] +current_day)
-            mystring = table.get_string()
+            mystring = table.get_html_string()
             with open(os.path.join(output_dir, f"{faculty}.txt"), 'w') as file:
                 file.write(mystring)
         
@@ -309,7 +309,7 @@ def generate_time_table():
                         else:
                             current_day.append('No class scheduled')
                 table.add_row([day] +current_day)
-            mystring = table.get_string()
+            mystring = table.get_html_string()
             with open(os.path.join(output_dir, f"{room}.txt"), 'w') as file:
                 file.write(mystring)
 

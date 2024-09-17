@@ -193,11 +193,13 @@ def generate_timetable():
 def timetable():
     global valid_paths
     if valid_paths == []:
-        return redirect('/')
+        valid_paths = utils.getValidOutputPaths()
+        if valid_paths == []:
+            flash('No timetables generated yet!', 'danger')
+            return redirect('/')
     facultywise_outputs = []
     groupwise_outputs = []
     roomwise_outputs = []
-    print(valid_paths)
     for path in valid_paths:
         if 'facultywise_outputs' in path:
             facultywise_outputs.append([path[36:],path])
@@ -215,10 +217,18 @@ def timetable():
 def get_timetable():
     path = request.args.get('path')
     global valid_paths
+    if valid_paths == []:
+        flash('No timetables generated yet!', 'danger')
+        return redirect('/')
+    path = path.replace(' ','+') # For those pesky lab classes names with pluses being converted to spaces while url encoding
     if path in valid_paths:
-        return send_from_directory('./generate_timetable/outputs/', path)
+        with open(f'./generate_timetable/outputs/{path}') as file:
+            timetable_raw_html = file.read()
+            timetable_raw_html = timetable_raw_html.replace('No class scheduled',' ') # For neater tables
+        return render_template('display_timetable.html',timetable_raw_html=timetable_raw_html, timetable_name=path.replace('tabular_outputs/','').replace(".txt",''))
     else:
-        return 'Invalid path!', 400
+        flash('Invalid timetable path! Please generate timetables', 'danger')
+        return redirect('/generate_timetable')
 
 if __name__ == '__main__':
     app.run(port=8000,debug=True)
