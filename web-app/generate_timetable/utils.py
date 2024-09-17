@@ -1,4 +1,4 @@
-import csv
+import csv, os
 def classes_to_csv(classes,csv_file_path='./generate_timetable/inputs/classes.csv'):
     '''Format expected:
         Course facilitator, course code (represents the subject), class (group of students), hours required per week
@@ -53,3 +53,18 @@ def lab_professors_to_csv(professors,csv_file_path='./generate_timetable/inputs/
         writer = csv.writer(file)
         for professor in professors:
             writer.writerow([professor])
+
+def getValidOutputPaths():
+    '''Returns a list of valid output paths for the timetable'''
+    valid_paths = ['allinone.txt']
+    for x in os.listdir('./generate_timetable/outputs/tabular_outputs/facultywise_outputs'):
+        valid_paths.append(f'tabular_outputs/facultywise_outputs/{x}')
+    for x in os.listdir('./generate_timetable/outputs/tabular_outputs/groupwise_outputs'):
+        valid_paths.append(f'tabular_outputs/groupwise_outputs/{x}')
+    for x in os.listdir('./generate_timetable/outputs/tabular_outputs/roomwise_outputs'):
+        valid_paths.append(f'tabular_outputs/roomwise_outputs/{x}')
+    return valid_paths
+
+if __name__ == '__main__':
+    for x in getValidOutputPaths():
+        print(x)

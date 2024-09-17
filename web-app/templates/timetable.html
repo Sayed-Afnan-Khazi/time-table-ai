@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Add Classes{% endblock %}
+
+{% block content %}
+<div class="container-sm mt-4 px-4 mx-5">
+    <h2>Generated Timetables:</h2>
+    <h4>Facultywise Outputs</h4>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Faculty</th>
+                <th scope="col">Timetable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for faculty in facultywise_outputs %}
+            <tr>
+                <td>{{ faculty[0] }}</td>
+                <td>
+                    <a href="/get_timetable?path={{ faculty[1] }}" class="btn btn-primary">Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h4>Groupwise Outputs</h4>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Group</th>
+                <th scope="col">Timetable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groupwise_outputs %}
+            <tr>
+                <td>{{ group[0] }}</td>
+                <td>
+                    <a href="/get_timetable?path={{ group[1] }}" class="btn btn-primary">Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h4>Roomwise Outputs</h4>
+    <table class="table table-striped border border-4 mt-3">
+        <thead>
+            <tr>
+                <th scope="col">Room</th>
+                <th scope="col">Timetable</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for room in roomwise_outputs %}
+            <tr>
+                <td>{{ room[0] }}</td>
+                <td>
+                    <a href="/get_timetable?path={{ room[1] }}" class="btn btn-primary">Download</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

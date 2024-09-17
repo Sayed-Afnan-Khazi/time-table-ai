@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, url_for
+from flask import Flask, render_template, request, flash, redirect, url_for, send_from_directory
 from generate_timetable import utils
 from generate_timetable.time_table import generate_time_table
 
@@ -75,6 +75,8 @@ inputted_lab_professors = [
     "NA",
     "MPS"
 ]
+
+valid_paths = []
 
 def map_fixed_classes_timeslots(fixed_classes):
     fixed_classes_timeslots_map = {'7:30-8:30': 'A', '8:30-9:30': 'B', '9:30-10:30': 'C', '10:30-11:00': 'M_BREAK', '11:00-11:50': 'D', '11:50-12:40': 'E', '12:40-13:30': 'F', '13:30-14:30': 'L_BREAK', '14:30-15:30': 'G', '15:30-16:30': 'H', '16:30-17:30': 'I'}
@@ -172,7 +174,7 @@ def delete_lab_professor(ind):
 
 @app.route('/generate_timetable', methods=['POST','GET'])
 def generate_timetable():
-    global inputted_classes, inputted_fixed_classes, inputted_lab_professors
+    global inputted_classes, inputted_fixed_classes, inputted_lab_professors, valid_paths
     if request.method == 'POST':
         utils.classes_to_csv(inputted_classes)
         map_fixed_classes_timeslots(inputted_fixed_classes)
@@ -182,9 +184,41 @@ def generate_timetable():
         inputted_fixed_classes = []
         inputted_lab_professors = []
         generate_time_table()
-        return render_template('timetable.html')
+        valid_paths = utils.getValidOutputPaths()
+        return redirect('/timetable')
     else:
         return render_template('generate_timetable.html',classes=list(enumerate(inputted_classes)),fixed_classes=list(enumerate(inputted_fixed_classes)),lab_professors=list(enumerate(inputted_lab_professors)))
+
+@app.route('/timetable')
+def timetable():
+    global valid_paths
+    if valid_paths == []:
+        return redirect('/')
+    facultywise_outputs = []
+    groupwise_outputs = []
+    roomwise_outputs = []
+    print(valid_paths)
+    for path in valid_paths:
+        if 'facultywise_outputs' in path:
+            facultywise_outputs.append([path[36:],path])
+        elif 'groupwise_outputs' in path:
+            groupwise_outputs.append([path[34:],path])
+        elif 'roomwise_outputs' in path:
+            roomwise_outputs.append([path[33:],path])
+    return render_template('timetable.html', 
+                           facultywise_outputs=facultywise_outputs,
+                            groupwise_outputs=groupwise_outputs, 
+                            roomwise_outputs=roomwise_outputs)
+
+
+@app.route('/get_timetable')
+def get_timetable():
+    path = request.args.get('path')
+    global valid_paths
+    if path in valid_paths:
+        return send_from_directory('./generate_timetable/outputs/', path)
+    else:
+        return 'Invalid path!', 400
 
 if __name__ == '__main__':
     app.run(port=8000,debug=True)
