@@ -1,11 +1,11 @@
 import csv, os
 def classes_to_csv(classes,csv_file_path='./generate_timetable/inputs/classes.csv'):
     '''Format expected:
-        Course facilitator, course code (represents the subject), class (group of students), hours required per week
+        Course facilitator, course code (represents the subject), class (group of students), hours required per week, session (M for morning and A for afternoon)
 
 Example:
 [
-    ["Afnan", "20CB001", "CSBS-1", "5"],
+    ["Afnan", "20CB001", "CSBS-1", "5",'M'],
     ...
 ]
 '''

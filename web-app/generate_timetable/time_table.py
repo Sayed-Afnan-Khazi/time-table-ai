@@ -40,12 +40,13 @@ def generate_time_table():
     lab_professors_allotable = get_lab_professors()
 
     class Class:
-        def __init__(self, faculty, name_code, group, hours):
+        def __init__(self, faculty, name_code, group, hours, class_session):
             self.faculty = faculty
             self.name_code = name_code
             self.group = group
             self.hours = hours
             self.original_hours = self.hours
+            self.class_session = class_session
 
             if self.name_code.endswith('L'):
                 # For laboratory classes
@@ -106,6 +107,7 @@ def generate_time_table():
             self.name_code = None
             self.group = None
             self.hours = None
+            self.class_session = None
         def format(self):
             return "BREAK"
         
@@ -143,11 +145,11 @@ def generate_time_table():
     def read_classes():
         with open(base_input_dir+'/classes.csv', 'r') as file:
             for line in file:
-                faculty, name_code, group, hours = line.strip().split(',')
-                faculty, name_code, group, hours = faculty.strip(), name_code.strip(), group.strip(), hours.strip()
+                faculty, name_code, group, hours, class_session = line.strip().split(',')
+                faculty, name_code, group, hours, class_session = faculty.strip(), name_code.strip(), group.strip(), hours.strip(), class_session.strip()
                 faculties_set.add(faculty)
                 groups_set.add(group)
-                classes.append(Class(faculty, name_code, group, int(hours)))
+                classes.append(Class(faculty, name_code, group, int(hours), class_session))
         with open(base_input_dir+'/fixed_classes.csv', 'r') as file:
             for line in file:
                 faculty, name_code, group, day, time = line.strip().split(',')
@@ -329,6 +331,15 @@ def generate_time_table():
         
         priority = []
         timings = list(timeslots.keys())
+        if cls.class_session == 'M':
+            timings = timings[:7]
+            print("Allotting for Morning session")
+        elif cls.class_session == 'A':
+            timings = timings[4:]
+            print("Allotting for Afternoon session")
+        else:
+            raise ValueError("Invalid class session, refer format for class session")
+        print(timings)
         for day in days:
             for current_timeslot, time in enumerate(timings):
                 for i, room in enumerate(places):
@@ -377,6 +388,8 @@ def generate_time_table():
 
         
         def sort_priority(allotable_location):
+            print("Inside sort_priority")
+            print("Timings for the day:",timings)
             # This is kinda our heuristic function to make the previous greedy allotment a bit more cohesive.
             day, current_timeslot, room = allotable_location
             score = 0
@@ -466,7 +479,13 @@ def generate_time_table():
         return False
 
     def schedule_classes(time_table, classes):
-        return backtrack_schedule(time_table, classes)
+        try:
+            return backtrack_schedule(time_table, classes)
+        except KeyboardInterrupt:
+            print("Interrupted by user, printing current time table")
+            print("Total class hours left to allot:",sum([cls.hours for cls in classes]))
+            print_time_table(time_table)
+            return False
     
     classes, fixed_classes = read_classes()
     time_table = init_time_table()

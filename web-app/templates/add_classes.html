@@ -22,6 +22,13 @@
             <label for="course_hours_required">Course Hours Required Per Week</label>
             <input type="number" min="1" max="6" step="1" class="form-control" id="course_hours_required" name="course_hours_required" required>
         </div>
+        <div>
+            <label for="course_session">Course Hours Required Per Week</label>
+            <select class="form-control" id="course_session" name="course_session" required>
+                <option value="M">Morning (7:30AM to 1:30PM)</option>
+                <option value="A">Afternoon (1:30PM to 5:30PM)</option>
+            </select>
+        </div>
         <button type="submit" class="btn btn-primary">Add Class</button>
     </form>
     <h3 class="mt-5">Existing Classes</h3>
@@ -32,6 +39,7 @@
                 <th scope="col">Course Code</th>
                 <th scope="col">Course Group</th>
                 <th scope="col">Course Hours Required Per Week</th>
+                <th scope="col">Course Session (Morning/Afternoon)</th>
                 <th scope="col">Actions</th>
             </tr>
         </thead>
@@ -42,6 +50,7 @@
                 <td>{{ class[1][1] }}</td>
                 <td>{{ class[1][2] }}</td>
                 <td>{{ class[1][3] }}</td>
+                <td>{{ class[1][4] }}</td>
                 <td>
                     <form action="/delete_class/{{ class[0] }}" method="POST" style="display:inline;">
                         <button type="submit" class="btn btn-danger">Delete</button>
