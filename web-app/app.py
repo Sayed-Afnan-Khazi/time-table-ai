@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, flash, redirect, url_for, send_from_directory
+import threading
 from generate_timetable import utils
-from generate_timetable.time_table import generate_time_table
+from generate_timetable.time_table import run_backtrack_algo_with_threads as generate_time_table
 
 app = Flask(__name__, template_folder='templates', static_url_path='', static_folder='static')
 app.secret_key = 'super duper secret key'

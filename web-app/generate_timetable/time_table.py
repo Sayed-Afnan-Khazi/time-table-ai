@@ -2,6 +2,9 @@
 import random
 import csv
 import os
+import threading
+import multiprocessing
+import warnings
 from prettytable import PrettyTable, from_csv, DOUBLE_BORDER
 
 def generate_time_table():
@@ -126,7 +129,7 @@ def generate_time_table():
             else:
                 self.time = time
             if self.name_code.endswith('L'):
-                raise Warning("Labs are not considered for fixed classes for now, please remove the 'L' from the name_code in fixed_classes.csv file. This clas will be considered as a theory class.")
+                raise ValueError("Labs are not considered for fixed classes for now, please remove the 'L' from the name_code in fixed_classes.csv file. This clas will be considered as a theory class.")
             self.class_type = 'T'
             self.faculty1 = None # Should improve this with a super() call in the future.
             self.faculty2 = None
@@ -231,7 +234,7 @@ def generate_time_table():
                     current_day.append(slot_data)
             table.add_row([day] +current_day)
         mystring = table.get_html_string()
-        with open(os.path.join(output_dir, f"allinone.txt"), 'w') as file:
+        with open(os.path.join(output_dir, f"allinone.html"), 'w') as file:
             file.write(mystring)
 
         # class "group" wise
@@ -258,7 +261,7 @@ def generate_time_table():
                             current_day.append('No class scheduled')
                 table.add_row([day] +current_day)
             mystring = table.get_html_string()
-            with open(os.path.join(output_dir, f"{group}.txt"), 'w') as file:
+            with open(os.path.join(output_dir, f"{group}.html"), 'w') as file:
                 file.write(mystring)
         
         # faculty wise
@@ -285,7 +288,7 @@ def generate_time_table():
                             current_day.append('No class scheduled')
                 table.add_row([day] +current_day)
             mystring = table.get_html_string()
-            with open(os.path.join(output_dir, f"{faculty}.txt"), 'w') as file:
+            with open(os.path.join(output_dir, f"{faculty}.html"), 'w') as file:
                 file.write(mystring)
         
         # room wise
@@ -312,7 +315,7 @@ def generate_time_table():
                             current_day.append('No class scheduled')
                 table.add_row([day] +current_day)
             mystring = table.get_html_string()
-            with open(os.path.join(output_dir, f"{room}.txt"), 'w') as file:
+            with open(os.path.join(output_dir, f"{room}.html"), 'w') as file:
                 file.write(mystring)
 
 
@@ -329,17 +332,20 @@ def generate_time_table():
         if cls is None:
             return True
         
+        if cancel_event.is_set():
+            # print("Cancel event is set, stopping the algorithm.")
+            return False
+        
         priority = []
         timings = list(timeslots.keys())
         if cls.class_session == 'M':
             timings = timings[:7]
-            print("Allotting for Morning session")
+            # print("Allotting for Morning session")
         elif cls.class_session == 'A':
             timings = timings[4:]
-            print("Allotting for Afternoon session")
+            # print("Allotting for Afternoon session")
         else:
             raise ValueError("Invalid class session, refer format for class session")
-        print(timings)
         for day in days:
             for current_timeslot, time in enumerate(timings):
                 for i, room in enumerate(places):
@@ -388,8 +394,6 @@ def generate_time_table():
 
         
         def sort_priority(allotable_location):
-            print("Inside sort_priority")
-            print("Timings for the day:",timings)
             # This is kinda our heuristic function to make the previous greedy allotment a bit more cohesive.
             day, current_timeslot, room = allotable_location
             score = 0
@@ -441,7 +445,7 @@ def generate_time_table():
                     time_table[day][timings[current_timeslot+1]][room] = cls
                     time_table[day][timings[current_timeslot+2]][room] = cls
                     cls.hours -= 3
-                    print("Allotted",cls.format())
+                    # print("Allotted",cls.format())
 
                     if backtrack_schedule(time_table, classes):
                         return True
@@ -450,12 +454,12 @@ def generate_time_table():
                     time_table[day][timings[current_timeslot+1]][room] = None
                     time_table[day][timings[current_timeslot+2]][room] = None
                     cls.hours += 3
-                    print("De-Allotted",cls.format())
+                    # print("De-Allotted",cls.format())
                 elif hours == 2:
                     time_table[day][timings[current_timeslot]][room] = cls
                     time_table[day][timings[current_timeslot+1]][room] = cls
                     cls.hours -= 2
-                    print("Allotted",cls.format())
+                    # print("Allotted",cls.format())
 
                     if backtrack_schedule(time_table, classes):
                         return True
@@ -463,20 +467,114 @@ def generate_time_table():
                     time_table[day][timings[current_timeslot]][room] = None
                     time_table[day][timings[current_timeslot+1]][room] = None
                     cls.hours += 2
-                    print("De-Allotted",cls.format())
+                    # print("De-Allotted",cls.format())
             else:
                 time_table[day][timings[current_timeslot]][room] = cls
                 cls.hours -= 1
-                print("Allotted",cls.format())
+                # print("Allotted",cls.format())
 
                 if backtrack_schedule(time_table, classes):
                     return True
 
                 time_table[day][timings[current_timeslot]][room] = None
                 cls.hours += 1
-                print("De-Allotted",cls.format())
+                # print("De-Allotted",cls.format())
         
         return False
+    
+
+    def verify_time_table(time_table):
+        # Verify the time table
+        for test_class in classes:
+            if test_class.hours > 0:
+                warnings.warn("Class not scheduled:",test_class.format())
+                return False
+            acc_hours = 0
+            # Check if all class hours are actually present in the time_table.
+            # Also make sure that the faculty and group are not in any other location at the same time.
+            timings = list(timeslots.keys())
+            for day in days:
+                for current_timeslot, time in enumerate(timings):
+                    for i, room in enumerate(places):
+                        if test_class.class_type == 'L':
+                            # For labs
+                            if room not in labs:
+                                continue
+                            
+                            if test_class.original_hours == 3:
+                                # For 3 hour labs
+                                if current_timeslot+2 >= len(timings):
+                                    continue
+                                if (time_table[day][time][room] and time_table[day][timings[current_timeslot+1]][room] and time_table[day][timings[current_timeslot+2]][room] and
+                                    time_table[day][time][room].name_code == test_class.name_code and
+                                    time_table[day][time][room].faculty == test_class.faculty and
+                                    time_table[day][time][room].group == test_class.group and
+                                    time_table[day][timings[current_timeslot+1]][room].name_code == test_class.name_code and
+                                    time_table[day][timings[current_timeslot+1]][room].faculty == test_class.faculty and
+                                    time_table[day][timings[current_timeslot+1]][room].group == test_class.group and
+                                    time_table[day][timings[current_timeslot+2]][room].name_code == test_class.name_code and
+                                    time_table[day][timings[current_timeslot+2]][room].faculty == test_class.faculty and
+                                    time_table[day][timings[current_timeslot+2]][room].group == test_class.group):
+                                    # Check if that group is only present in that room at that day and those times
+                                    for r in places:
+                                        if r != room and (time_table[day][time][r] and time_table[day][time][r].group == test_class.group or
+                                            time_table[day][timings[current_timeslot+1]][r] and time_table[day][timings[current_timeslot+1]][r].group == test_class.group or
+                                            time_table[day][timings[current_timeslot+2]][r] and time_table[day][timings[current_timeslot+2]][r].group == test_class.group):
+                                            print(f"Group {test_class.format()} is scheduled in multiple rooms at the same time by algo, please check the time table. Conflicting room: {r} and {room}")
+                                            return False
+                                    # Check if that faculty is only present in that room at that day and those times
+                                    for r in places:
+                                        if r != room and (time_table[day][time][r] and time_table[day][time][r].faculty == test_class.faculty or
+                                            time_table[day][timings[current_timeslot+1]][r] and time_table[day][timings[current_timeslot+1]][r].faculty == test_class.faculty or
+                                            time_table[day][timings[current_timeslot+2]][r] and time_table[day][timings[current_timeslot+2]][r].faculty == test_class.faculty):
+                                            print(f"Faculty {test_class.format()} is scheduled in multiple rooms at the same time by algo, please check the time table. Conflicting room: {r} and {room}")
+                                            return False
+                                    acc_hours += 3
+                            if test_class.original_hours == 2:
+                                # For 2 hour labs
+                                if current_timeslot+1 >= len(timings):
+                                    continue
+                                if (time_table[day][time][room] and time_table[day][timings[current_timeslot+1]][room] and
+                                    time_table[day][time][room].name_code == test_class.name_code and
+                                    time_table[day][time][room].faculty == test_class.faculty and
+                                    time_table[day][time][room].group == test_class.group and
+                                    time_table[day][timings[current_timeslot+1]][room].name_code == test_class.name_code and
+                                    time_table[day][timings[current_timeslot+1]][room].faculty == test_class.faculty and
+                                    time_table[day][timings[current_timeslot+1]][room].group == test_class.group):
+                                    # Check if that group is only present in that room at that day and those times
+                                    for r in places:
+                                        if r != room and (time_table[day][time][r] and time_table[day][time][r].group == test_class.group or
+                                            time_table[day][timings[current_timeslot+1]][r] and time_table[day][timings[current_timeslot+1]][r].group == test_class.group):
+                                            print(f"Group {test_class.format()} is scheduled in multiple rooms at the same time by algo, please check the time table. Conflicting room: {r} and {room}")
+                                            return False
+                                    # Check if that faculty is only present in that room at that day and those times
+                                    for r in places:
+                                        if r != room and (time_table[day][time][r] and time_table[day][time][r].faculty == test_class.faculty or
+                                            time_table[day][timings[current_timeslot+1]][r] and time_table[day][timings[current_timeslot+1]][r].faculty == test_class.faculty):
+                                            print(f"Faculty {test_class.format()} is scheduled in multiple rooms at the same time by algo, please check the time table. Conflicting room: {r} and {room}")
+                                            return False
+                                    acc_hours += 2
+                        elif (time_table[day][time][room] and # There is a class scheduled
+                            time_table[day][time][room].name_code == test_class.name_code and # The class name matches
+                            time_table[day][time][room].faculty == test_class.faculty and # The faculty matches
+                            time_table[day][time][room].group == test_class.group): # The group matches
+                            # Check if that group is only present in that room at that day and time
+                            for r in places:
+                                if r != room and time_table[day][time][r] and time_table[day][time][r].group == test_class.group:
+                                    print(f"Group {test_class.format()} is scheduled in multiple rooms at the same time by algo, please check the time table. Conflicting room: {r} and {room}")
+                                    return False
+                            # Check if that faculty is only present in that room at that day and time
+                            for r in places:
+                                if r != room and time_table[day][time][r] and time_table[day][time][r].faculty == test_class.faculty:
+                                    print(f"Faculty {test_class.format()} is scheduled in multiple rooms at the same time by algo, please check the time table. Conflicting room: {r} and {room}")
+                                    return False
+                            acc_hours += 1
+            if acc_hours != test_class.original_hours:
+                print(f"Class {test_class.format()} is not scheduled for the correct number of hours. Expected {test_class.original_hours}, got {acc_hours}")
+                return False
+     
+        print("Time table verified successfully")
+        return True
 
     def schedule_classes(time_table, classes):
         try:
@@ -489,9 +587,107 @@ def generate_time_table():
     
     classes, fixed_classes = read_classes()
     time_table = init_time_table()
-    print(schedule_classes(time_table, classes))
-    print_time_table(time_table)
+    val_to_return = schedule_classes(time_table, classes)
+    if val_to_return:
+        print_time_table(time_table)
+        print("time table checked?",verify_time_table(time_table))
+    return val_to_return
+
+
+############################ EXPERIMENTAL ZONE - MULTIPROCESSING AND THREADING ######################
+
+# Shared flag to stop all running threads and processes when a solution is found
+cancel_event = multiprocessing.Event()
+
+# Counter to keep track of the number of running threads (for each process)
+thread_lock = threading.Lock()  # Lock for thread counter in each process
+
+process_counter = multiprocessing.Value('i', 0)  # Shared counter for running processes
+
+# Function to run the backtracking algorithm with a timeout within a process
+def run_with_timeout(backtracking_algorithm):
+    global thread_lock
+    thread_count = 0  # Local counter for threads within a process
+    result = None
+
+    def target():
+        nonlocal result
+        nonlocal thread_count
+
+        with thread_lock:  # Lock the counter while modifying it
+            thread_count += 1  # Increment thread count when a thread starts
+            print(f"Process {multiprocessing.current_process().name} - Thread {threading.current_thread().name} started. "
+                  f"Running threads in process: {thread_count}")
+
+        # Run the backtracking algorithm
+        result = backtracking_algorithm()
+
+        if result:  # If solution is found, trigger the cancel event
+            cancel_event.set()
+
+        with thread_lock:  # Lock the counter while modifying it
+            thread_count -= 1  # Decrement thread count when a thread finishes
+            print(f"Process {multiprocessing.current_process().name} - Thread {threading.current_thread().name} finished. "
+                  f"Running threads in process: {thread_count}")
+
+    while result is None and not cancel_event.is_set():  # Keep trying until a solution is found or event is set
+        thread = threading.Thread(target=target)
+        thread.start()
+        thread.join(timeout=5)  # Wait 5 seconds for the algorithm to complete
+
+
+        if thread.is_alive():  # If the thread is still alive (timeout)
+            print(f"Process {multiprocessing.current_process().name} - Thread {threading.current_thread().name} Timeout! Restarting the algorithm...")
+        else:
+            if result:
+                print(f"Process {multiprocessing.current_process().name} - Thread {threading.current_thread().name} Solution found in a process! Writing results to files.")
+                cancel_event.set() # maybe required?
+                return result
+            else:
+                print(f"Process {multiprocessing.current_process().name} - Thread {threading.current_thread().name} Algorithm canceled or no solution found in thread.")
+
+    return result
+
+
+def run_backtrack_algo_with_threads():
+    run_with_timeout(generate_time_table)
+
+# Worker function to run in each process
+def process_worker():
+    global process_counter
+    with process_counter.get_lock():  # Lock to safely modify process counter
+        process_counter.value += 1  # Increment process count when a process starts
+        print(f"Process started. Running processes: {process_counter.value}")
+
+    # Run the backtracking algorithm with thread management
+    run_backtrack_algo_with_threads()
+
+    with process_counter.get_lock():  # Lock to safely modify process counter
+        process_counter.value -= 1  # Decrement process count when a process finishes
+        print(f"Process finished. Running processes: {process_counter.value}")
+
+
+# Function to run multiple processes in parallel
+def run_with_multiprocessing():
+    global process_counter
+    processes = []
+    num_processes = 3  # Number of parallel processes to run
+
+    # Start multiple processes
+    for _ in range(num_processes):
+        process = multiprocessing.Process(target=process_worker)
+        processes.append(process)
+        process.start()
+
+    # Wait for all processes to complete
+    for process in processes:
+        process.join()
+
+    print("All processes completed or solution found.")
+
 
 
 if __name__ == '__main__':
-    generate_time_table()
+    run_with_multiprocessing()
+    # run_backtrack_algo_with_threads()
+    # generate_time_table()
